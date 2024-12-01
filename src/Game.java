@@ -2,34 +2,42 @@ import java.util.Scanner;
 
 public class Game {
 
-    public static void start() {
+    public static void start(int[] startBoard) {
+        boolean finish = false;
         Scanner sc = new Scanner(System.in);
+        int[][] board = Util.transformarEm2D(startBoard);
         var gs = new GameState();
-
-        System.out.println("*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*");
-        System.out.println("Início de jogo");
-
-        int[] vectorBoard =  new int[]{ 8, 5, 0, 0, 0, 2, 4, 0, 0, 7, 2, 0, 0, 0, 0, 0, 0, 9, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 7, 0, 0, 2, 3, 0, 5, 0, 0, 0, 9, 0, 0 ,0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 7, 0, 0, 1, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 0, 4, 0};
-        Board.printBoard(vectorBoard);
-
-        int[][] board = Util.transformarEm2D(vectorBoard);
         gs.setBoard(board);
 
-        userInsert(gs, sc);
+        while (!finish) {
+            Board.printBoard(Util.transformarEm1D(gs.getBoard()));
 
-        gs.setLine(ColumnEnum.valueOf(gs.getCoordenades().substring(0, 1).toUpperCase()).getDescricao());
-        gs.setCol(Integer.parseInt(gs.getCoordenades().substring(1, 2)) - 1);
+            userInsert(gs, sc);
+            if (gs.getNumber() == 00) finish = true;
 
-        if(verifyLine(gs) && verifyColumn(gs)) {
-            gs.setNumberInBoard();
-        } else {
-            System.out.println("Impossível colocar " + gs.getNumber() + " nessa posição");
+            gs.setLine(ColumnEnum.valueOf(gs.getCoordenades().substring(0, 1).toUpperCase()).getDescricao());
+            gs.setCol(Integer.parseInt(gs.getCoordenades().substring(1, 2)) - 1);
+
+            if (verifyLine(gs) && verifyColumn(gs) && verifyQuadrant(gs)) {
+                gs.setNumberInBoard();
+            } else {
+                System.out.println("Impossível colocar " + gs.getNumber() + " nessa posição");
+            }
+
+            Util.clearConsole();
         }
-
-        Util.clearConsole();
-        Board.printBoard(Util.transformarEm1D(gs.getBoard()));
-
         sc.close();
+    }
+
+    private static boolean verifyQuadrant(GameState gs) {
+        for (int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
+                if (gs.getBoard()[i][j] == gs.getNumber()) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private static boolean verifyColumn(GameState gs) {
